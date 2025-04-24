@@ -225,8 +225,26 @@ employees as e2
 ON e2.emp_id = b.manager_id;
 ```
 
-Task 11. **Create a Table of Books with Rental Price Above a Certain Threshold (7.00). Rank the records based on high to low rental price. If ties, don't skip next rank.**:
+Task 11. **Create a Table of Books with Rental Price Above a Certain Threshold (7.00). Rank the records based on high to low rental price. 
+Write 3 queries (If ties, skip next rank. If ties, don't skip next rank, Uniuqe number throughout the table**:
+
 ```sql
+--Query 1: If ties, skip next rank
+
+CREATE TABLE expensive_books_ranked
+AS
+SELECT 
+     book_title,
+     rental_price,
+     RANK() OVER (ORDER BY rental_price desc) as Rank
+FROM books
+WHERE
+   rental_price > 7.00;
+
+SELECT * FROM expensive_books_ranked;
+
+--Query 2: If ties, don't skip next rank
+
 CREATE TABLE expensive_books_ranked
 AS
 SELECT 
@@ -238,6 +256,21 @@ WHERE
    rental_price > 7.00;
 
 SELECT * FROM expensive_books_ranked;
+
+--Query 3: Unique number throughtout table
+
+CREATE TABLE expensive_books_ranked
+AS
+SELECT 
+     book_title,
+     rental_price,
+     ROW_NUMBER() OVER (ORDER BY rental_price desc) as row_number
+FROM books
+WHERE
+   rental_price > 7.00;
+
+SELECT * FROM expensive_books_ranked;
+
 ```
 
 Task 12: **Retrieve the List of Books Not Yet Returned**
@@ -281,6 +314,7 @@ ORDER BY 1;
 
 **Task 14: Update Book Status on Return**  
 Write a query to update the status of books in the books table to "Yes" when they are returned (based on entries in the return_status table).
+Write query using Stored Procedure
 
 
 ```sql
@@ -336,8 +370,6 @@ CALL add_return_records('RS138', 'IS135', 'Good');
 CALL add_return_records('RS148', 'IS140', 'Good');
 
 ```
-
-
 
 
 **Task 15: Branch Performance Report**  
@@ -609,6 +641,47 @@ GROUP BY
 SELECT * FROM overdue_books_summary
 ```
 
+
+**Task 24: Update Book Status when issued**  
+Write a query to update the status of books in the books table to "No" when they are issued (based on entries in the issued_status table).
+Write 2 queries using Trigger (PLSQL and PGSQL i.e. Postgre SQL)
+
+```sql
+--Using PLSQL
+
+CREATE OR REPLACE TRIGGER
+trg_update_book_status_on_issue
+AFTER INSERT ON issued_status
+FOR EACH ROW
+BEGIN
+    UPDATE books
+    SET status = 'No'
+    WHERE isbn = NEW.issued_book_isbn;
+END;
+/
+
+--Using Postgre SQL
+
+CREATE OR REPLACE FUNCTION
+update_book_status_on_issue()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE books
+    SET status = 'no'
+    WHERE isbn = NEW.issued_book_isbn;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER
+trg_update_book_status_on_issue
+AFTER INSERT ON issued_status
+FOR EACH ROW
+EXECUTE FUNCTION
+update_book_status_on_issue();
+
+```
+
 ## Reports
 
 - **Database Schema**: Detailed table structures and relationships.
@@ -622,7 +695,7 @@ SELECT * FROM overdue_books_summary
 
 ## Conclusion
 
-This project demonstrates the application of SQL skills in creating and managing a library management system. It includes database setup, data manipulation, and advanced querying, providing a solid foundation for data management and analysis. Queries include `GROUP BY`, `ORDER BY`, `HAVING`, `JOINS`, `STORED PROCEDURES`, `CTE`, `CTAS`, `CRUD` WINDOW FUNCTIONS (`LEAD`, `LAG`, `FIRST_VALUE`, `SUM`, `AVG`)
+This project demonstrates the application of SQL skills in creating and managing a library management system. It includes database setup, data manipulation, and advanced querying, providing a solid foundation for data management and analysis. Queries include `GROUP BY`, `ORDER BY`, `HAVING`, `JOINS`, `CTE`, `CTAS`, `CRUD`, WINDOW FUNCTIONS (`DENSE_RANK`, `LEAD`, `LAG`, `FIRST_VALUE`, `SUM`, `AVG`), `STORED PROCEDURES`, `FUNCTION`, `TRIGGER`
 
 ## Author - Prayag Dave
 
