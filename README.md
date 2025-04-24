@@ -260,7 +260,7 @@ SELECT
     m.member_name,
     bk.book_title,
     ist.issued_date,
-    CURRENT_DATE - ist.issued_date as over_dues_days
+    CURRENT_DATE - ist.issued_date as days_overdue
 FROM issued_status as ist
 JOIN 
 members as m
@@ -432,7 +432,7 @@ SELECT
      ist.issued_date,
      bk.rental_price,
      AVG(bk.rental_price) OVER (PARTITION BY e.emp_id) as total_rental_price,
-     LAG(bk.book_title) OVER (PARTITION BY e.emp_id ORDER BY ist.issued_date) as next_book
+     LAG(bk.book_title) OVER (PARTITION BY e.emp_id ORDER BY ist.issued_date) as previous_book
 FROM
    employees e
 JOIN 
@@ -454,7 +454,7 @@ SELECT
      ist.issued_date,
      bk.rental_price,
      SUM(bk.rental_price) OVER (PARTITION BY e.emp_id) as total_rental_price,
-     FIRST_VALUE(bk.book_title) OVER (PARTITION BY e.emp_id ORDER BY ist.issued_date) as next_book
+     FIRST_VALUE(bk.book_title) OVER (PARTITION BY e.emp_id ORDER BY ist.issued_date) as first_book
 FROM
    employees e
 JOIN 
@@ -476,11 +476,11 @@ SELECT
     COUNT(ist.issued_id) as no_book_issued
 FROM issued_status as ist
 JOIN
-employees as e
-ON e.emp_id = ist.issued_emp_id
+    employees as e
+    ON e.emp_id = ist.issued_emp_id
 JOIN
-branch as b
-ON e.branch_id = b.branch_id
+    branch as b
+    ON e.branch_id = b.branch_id
 GROUP BY 1, 2
 ```
 
@@ -598,11 +598,11 @@ SELECT
        ) AS total_fine
 FROM members as m
 JOIN 
-   issued_status as ist
-   ON m.member_id = ist.issued_id
+    issued_status as ist
+    ON m.member_id = ist.issued_id
 LEFT JOIN 
-   return_status as rs
-   ON ist.issued_id = rs.issued_id
+    return_status as rs
+    ON ist.issued_id = rs.issued_id
 GROUP BY
     m.member_id;
 
