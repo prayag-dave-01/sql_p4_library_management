@@ -1,14 +1,14 @@
-# Library Management System using SQL Project --P2
+# Library Management System using SQL
 
 ## Project Overview
 
 **Project Title**: Library Management System  
-**Level**: Intermediate  
+**Level**: Intermediate to Advanced
 **Database**: `library_db`
 
 This project demonstrates the implementation of a Library Management System using SQL. It includes creating and managing tables, performing CRUD operations, and executing advanced SQL queries. The goal is to showcase skills in database design, manipulation, and querying.
 
-![Library_project](https://github.com/najirh/Library-System-Management---P2/blob/main/library.jpg)
+![Library_project](https://github.com/prayag-dave-01/sql_p4_library_management/blob/main/library.jpg?raw=true)
 
 ## Objectives
 
@@ -20,7 +20,7 @@ This project demonstrates the implementation of a Library Management System usin
 ## Project Structure
 
 ### 1. Database Setup
-![ERD](https://github.com/najirh/Library-System-Management---P2/blob/main/library_erd.png)
+![ERD](https://github.com/prayag-dave-01/sql_p4_library_management/blob/main/library_erd.png?raw=true)
 
 - **Database Creation**: Created a database named `library_db`.
 - **Table Creation**: Created tables for branches, employees, members, books, issued status, and return status. Each table includes relevant columns and relationships.
@@ -197,7 +197,7 @@ issued_status as ist
 JOIN
 books as b
 ON b.isbn = ist.issued_book_isbn
-GROUP BY 1
+GROUP BY 1;
 ```
 
 9. **List Members Who Registered in the Last 180 Days**:
@@ -222,14 +222,22 @@ branch as b
 ON e1.branch_id = b.branch_id    
 JOIN
 employees as e2
-ON e2.emp_id = b.manager_id
+ON e2.emp_id = b.manager_id;
 ```
 
-Task 11. **Create a Table of Books with Rental Price Above a Certain Threshold**:
+Task 11. **Create a Table of Books with Rental Price Above a Certain Threshold (7.00). Rank the records based on high to low rental price. If ties, don't skip next rank.**:
 ```sql
-CREATE TABLE expensive_books AS
-SELECT * FROM books
-WHERE rental_price > 7.00;
+CREATE TABLE expensive_books_ranked
+AS
+SELECT 
+     book_title,
+     rental_price,
+     DENSE_RANK() OVER (ORDER BY rental_price desc) as Rank
+FROM books
+WHERE
+   rental_price > 7.00;
+
+SELECT * FROM expensive_books_ranked;
 ```
 
 Task 12: **Retrieve the List of Books Not Yet Returned**
@@ -252,7 +260,6 @@ SELECT
     m.member_name,
     bk.book_title,
     ist.issued_date,
-    -- rs.return_date,
     CURRENT_DATE - ist.issued_date as over_dues_days
 FROM issued_status as ist
 JOIN 
@@ -268,7 +275,7 @@ WHERE
     rs.return_date IS NULL
     AND
     (CURRENT_DATE - ist.issued_date) > 30
-ORDER BY 1
+ORDER BY 1;
 ```
 
 
@@ -287,8 +294,7 @@ DECLARE
     v_book_name VARCHAR(80);
     
 BEGIN
-    -- all your logic and code
-    -- inserting into returns based on users input
+    -- inserting into return_status table based on users input
     INSERT INTO return_status(return_id, issued_id, return_date, book_quality)
     VALUES
     (p_return_id, p_issued_id, CURRENT_DATE, p_book_quality);
@@ -313,9 +319,6 @@ $$
 
 
 -- Testing FUNCTION add_return_records
-
-issued_id = IS135
-ISBN = WHERE isbn = '978-0-307-58837-1'
 
 SELECT * FROM books
 WHERE isbn = '978-0-307-58837-1';
@@ -371,7 +374,9 @@ SELECT * FROM branch_reports;
 Use the CREATE TABLE AS (CTAS) statement to create a new table active_members containing members who have issued at least one book in the last 2 months.
 
 ```sql
+-- 2 methods
 
+--1. Using subquery
 CREATE TABLE active_members
 AS
 SELECT * FROM members
@@ -380,15 +385,88 @@ WHERE member_id IN (SELECT
                     FROM issued_status
                     WHERE 
                         issued_date >= CURRENT_DATE - INTERVAL '2 month'
-                    )
-;
+                    );
+--2. Using JOINS
+SELECT 
+   DISTINCT m.member_id, 
+   ist.issued_date
+FROM members as m
+JOIN
+   issued_status as ist
+   ON m.member_id = ist.issued_member_id
+WHERE 
+   ist.issued_date >= CURRENT_DATE - INTERVAL '2 months'
 
 SELECT * FROM active_members;
 
 ```
+**Task 17: List all employees along with book names which they have issued. Print column "next_book" to display the next issued book name in current row for that employee. Also display total rent of all books in each row for that employee. (Data to be displayed: employee id, employee name, book title, issued date, rent of book, total rental price and next book).
+
+```sql
+SELECT 
+     e.emp_id, 
+     e.emp_name, 
+     bk.book_title,
+     ist.issued_date,
+     bk.rental_price,
+     SUM(bk.rental_price) OVER (PARTITION BY e.emp_id) as total_rental_price,
+     LEAD(bk.book_title) OVER (PARTITION BY e.emp_id ORDER BY ist.issued_date) as next_book
+FROM
+   employees e
+JOIN 
+   issued_status as ist
+   ON e.emp_id = ist.issued_emp_id
+JOIN 
+   books as bk
+   ON ist.issued_book_isbn = isbn;
+```
 
 
-**Task 17: Find Employees with the Most Book Issues Processed**  
+**Task 18: List all employees along with book names they have issued. Print column "previous_book" to display the previously issued book name in current row for that employee. Also display average rent of all books in each row for that employee. (Data to be displayed: employee id, employee name, book title, issued date, rent of book, total rental price and next book).
+
+```sql
+SELECT 
+     e.emp_id, 
+     e.emp_name, 
+     bk.book_title,
+     ist.issued_date,
+     bk.rental_price,
+     AVG(bk.rental_price) OVER (PARTITION BY e.emp_id) as total_rental_price,
+     LAG(bk.book_title) OVER (PARTITION BY e.emp_id ORDER BY ist.issued_date) as next_book
+FROM
+   employees e
+JOIN 
+   issued_status as ist
+   ON e.emp_id = ist.issued_emp_id
+JOIN 
+   books as bk
+   ON ist.issued_book_isbn = isbn;
+```
+
+
+**Task 19: List all employees along with book names they have issued. Print column "first_book" to display the first issued book name in each row for that employee. Also display total rent of all books in each row for that employee. (Data to be displayed: employee id, employee name, book title, issued date, rent of book, total rental price and next book).
+
+```sql
+SELECT 
+     e.emp_id, 
+     e.emp_name, 
+     bk.book_title,
+     ist.issued_date,
+     bk.rental_price,
+     SUM(bk.rental_price) OVER (PARTITION BY e.emp_id) as total_rental_price,
+     FIRST_VALUE(bk.book_title) OVER (PARTITION BY e.emp_id ORDER BY ist.issued_date) as next_book
+FROM
+   employees e
+JOIN 
+   issued_status as ist
+   ON e.emp_id = ist.issued_emp_id
+JOIN 
+   books as bk
+   ON ist.issued_book_isbn = isbn;
+```
+
+
+**Task 20: Find Employees with the Most Book Issues Processed**  
 Write a query to find the top 3 employees who have processed the most book issues. Display the employee name, number of books processed, and their branch.
 
 ```sql
@@ -406,11 +484,30 @@ ON e.branch_id = b.branch_id
 GROUP BY 1, 2
 ```
 
-**Task 18: Identify Members Issuing High-Risk Books**  
+**Task 21: Identify Members Issuing High-Risk Books**  
 Write a query to identify members who have issued books more than twice with the status "damaged" in the books table. Display the member name, book title, and the number of times they've issued damaged books.    
+```sql
+SELECT 
+    m.member_name,
+    bk.book_title,
+	COUNT(*) as times_issued_damaged
+FROM members as m
+JOIN 
+    issued_status as ist
+    ON m.member_id = ist.issued_member_id
+JOIN 
+    books as bk
+    ON ist.issued_book_isbn = bk.isbn
+WHERE
+    bk.book_quality = 'Damaged'
+GROUP BY 
+    m.member_name, bk.book_title
+HAVING
+     COUNT(*) > 2;
+```
 
 
-**Task 19: Stored Procedure**
+**Task 22: Stored Procedure**
 Objective:
 Create a stored procedure to manage the status of books in a library system.
 Description:
@@ -474,20 +571,43 @@ WHERE isbn = '978-0-375-41398-8'
 ```
 
 
-
-**Task 20: Create Table As Select (CTAS)**
+**Task 23: Create Table As Select (CTAS)**
 Objective: Create a CTAS (Create Table As Select) query to identify overdue books and calculate fines.
+Description: Write a CTAS query to create a new table that lists each member and the books they have issued but not returned within 30 days. The table should include: The number of overdue books. The total fines, with each day's fine calculated at $0.50. The number of books issued by each member. The resulting table should show: Member ID Number of overdue books Total fines
 
-Description: Write a CTAS query to create a new table that lists each member and the books they have issued but not returned within 30 days. The table should include:
-    The number of overdue books.
-    The total fines, with each day's fine calculated at $0.50.
-    The number of books issued by each member.
-    The resulting table should show:
-    Member ID
-    Number of overdue books
-    Total fines
+```sql
+CREATE TABLE overdue_books_summary
+AS
+SELECT 
+    m.member_id,
+    COUNT(CASE
+             WHEN rs.return_id IS NULL 
+                  AND CURRENT_DATE - ist.issued_date > 30 THEN 1 
+             WHEN rs.return_id IS NOT NULL
+                  AND rs.return_date - ist.issued_date > 30 THEN 1
+             END
+         ) AS number_overdue_books,
+    SUM(CASE
+             WHEN rs.return_id IS NULL 
+                  AND CURRENT_DATE - ist.issued_date > 30 THEN 
+	          (CURRENT_DATE - ist.issued_date - 30) * 0.50
+             WHEN rs.return_id IS NOT NULL
+                  AND rs.return_date - ist.issued_date > 30 THEN
+                      (rs.return_date - ist.issued_date - 30) * 0.50
+             END
+       ) AS total_fine
+FROM members as m
+JOIN 
+   issued_status as ist
+   ON m.member_id = ist.issued_id
+LEFT JOIN 
+   return_status as rs
+   ON ist.issued_id = rs.issued_id
+GROUP BY
+    m.member_id;
 
-
+SELECT * FROM overdue_books_summary
+```
 
 ## Reports
 
@@ -495,28 +615,20 @@ Description: Write a CTAS query to create a new table that lists each member and
 - **Data Analysis**: Insights into book categories, employee salaries, member registration trends, and issued books.
 - **Summary Reports**: Aggregated data on high-demand books and employee performance.
 
+## Technology Stack
+- **Database**: PostgreSQL
+- **SQL Queries**: DDL, DML, Aggregations, Subqueries, Window Functions
+- **Tools**: pgAdmin 4 (used) (or any SQL editor), PostgreSQL (via Homebrew, Docker, or direct installation)
+
 ## Conclusion
 
-This project demonstrates the application of SQL skills in creating and managing a library management system. It includes database setup, data manipulation, and advanced querying, providing a solid foundation for data management and analysis.
+This project demonstrates the application of SQL skills in creating and managing a library management system. It includes database setup, data manipulation, and advanced querying, providing a solid foundation for data management and analysis. Queries include `GROUP BY`, `ORDER BY`, `HAVING`, `JOINS`, `STORED PROCEDURES`, `CTE`, `CTAS`, `CRUD` WINDOW FUNCTIONS (`LEAD`, `LAG`, `FIRST_VALUE`, `SUM`, `AVG`)
 
-## How to Use
+## Author - Prayag Dave
 
-1. **Clone the Repository**: Clone this repository to your local machine.
-   ```sh
-   git clone https://github.com/najirh/Library-System-Management---P2.git
-   ```
+This project is part of my portfolio, showcasing the SQL skills essential for data analyst roles. If you have any questions, feedback, or would like to collaborate, feel free to get in touch!
 
-2. **Set Up the Database**: Execute the SQL scripts in the `database_setup.sql` file to create and populate the database.
-3. **Run the Queries**: Use the SQL queries in the `analysis_queries.sql` file to perform the analysis.
-4. **Explore and Modify**: Customize the queries as needed to explore different aspects of the data or answer additional questions.
+- **LinkedIn**: [Connect with me professionally](https://www.linkedin.com/in/prayag-dave-56b3681b3)
+- **Mail**: prayagdavework@gmail.com
 
-## Author - Zero Analyst
-
-This project showcases SQL skills essential for database management and analysis. For more content on SQL and data analysis, connect with me through the following channels:
-
-- **YouTube**: [Subscribe to my channel for tutorials and insights](https://www.youtube.com/@zero_analyst)
-- **Instagram**: [Follow me for daily tips and updates](https://www.instagram.com/zero_analyst/)
-- **LinkedIn**: [Connect with me professionally](https://www.linkedin.com/in/najirr)
-- **Discord**: [Join our community for learning and collaboration](https://discord.gg/36h5f2Z5PK)
-
-Thank you for your interest in this project!
+Thank you for your support, and I look forward to connecting with you!
