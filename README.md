@@ -226,7 +226,7 @@ ON e2.emp_id = b.manager_id;
 ```
 
 **Task 11: Create a Table of Books with Rental Price Above a Certain Threshold (7.00). Rank the records based on high to low rental price. 
-Write 3 queries (If ties, skip next rank. If ties, don't skip next rank, Uniuqe number throughout the table**:
+Write 3 queries (If ties, skip next rank. If ties, don't skip next rank, Uniuqe number throughout the table)**
 
 ```sql
 --Query 1: If ties, skip next rank
