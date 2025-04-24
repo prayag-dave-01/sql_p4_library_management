@@ -257,7 +257,7 @@ WHERE
 
 SELECT * FROM expensive_books_ranked;
 
---Query 3: Unique number throughtout table
+--Query 3: Unique number throughout table
 
 CREATE TABLE expensive_books_ranked
 AS
@@ -432,7 +432,7 @@ WHERE
 SELECT * FROM active_members;
 
 ```
-**Task 17: List all employees along with book names which they have issued. Print column "next_book" to display the next issued book name in current row for that employee. Also display total rent of all books in each row for that employee. (Data to be displayed: employee id, employee name, book title, issued date, rent of book, total rental price and next book).
+**Task 17: List all employees along with book names which they have issued. Print column "next_book" to display the next issued book name in current row for that employee. Also display total rent of all books in each row for that employee. (Data to be displayed: employee id, employee name, book title, issued date, rent of book, total rental price and next book).**
 
 ```sql
 SELECT 
@@ -454,7 +454,7 @@ JOIN
 ```
 
 
-**Task 18: List all employees along with book names they have issued. Print column "previous_book" to display the previously issued book name in current row for that employee. Also display average rent of all books in each row for that employee. (Data to be displayed: employee id, employee name, book title, issued date, rent of book, total rental price and next book).
+**Task 18: List all employees along with book names they have issued. Print column "previous_book" to display the previously issued book name in current row for that employee. Also display average rent of all books in each row for that employee. (Data to be displayed: employee id, employee name, book title, issued date, rent of book, total rental price and next book).**
 
 ```sql
 SELECT 
@@ -476,7 +476,7 @@ JOIN
 ```
 
 
-**Task 19: List all employees along with book names they have issued. Print column "first_book" to display the first issued book name in each row for that employee. Also display total rent of all books in each row for that employee. (Data to be displayed: employee id, employee name, book title, issued date, rent of book, total rental price and next book).
+**Task 19: List all employees along with book names they have issued. Print column "first_book" to display the first issued book name in each row for that employee. Also display total rent of all books in each row for that employee. (Data to be displayed: employee id, employee name, book title, issued date, rent of book, total rental price and next book).**
 
 ```sql
 SELECT 
@@ -695,7 +695,7 @@ update_book_status_on_issue();
 
 ## Conclusion
 
-This project demonstrates the application of SQL skills in creating and managing a library management system. It includes database setup, data manipulation, and advanced querying, providing a solid foundation for data management and analysis. Queries include `GROUP BY`, `ORDER BY`, `HAVING`, `JOINS`, `CTE`, `CTAS`, `CRUD`, WINDOW FUNCTIONS (`DENSE_RANK`, `LEAD`, `LAG`, `FIRST_VALUE`, `SUM`, `AVG`), `STORED PROCEDURES`, `FUNCTION`, `TRIGGER`
+This project demonstrates the application of SQL skills in creating and managing a library management system. It includes database setup, data manipulation, and advanced querying, providing a solid foundation for data management and analysis. Queries include `GROUP BY`, `ORDER BY`, `HAVING`, `JOINS`, `CTE`, `CTAS`, `CRUD`, `STORED PROCEDURES`, `FUNCTION`, `TRIGGER`, WINDOW FUNCTIONS (`RANK`, `DENSE_RANK`, `ROW_NUMBER`, `LEAD`, `LAG`, `FIRST_VALUE`, `SUM`, `AVG`).
 
 ## Author - Prayag Dave
 
