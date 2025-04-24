@@ -514,6 +514,8 @@ JOIN
     branch as b
     ON e.branch_id = b.branch_id
 GROUP BY 1, 2
+ORDER BY no_book_issued
+LIMIT 3;
 ```
 
 **Task 21: Identify Members Issuing High-Risk Books**  
