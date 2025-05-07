@@ -168,7 +168,8 @@ HAVING COUNT(*) > 1
 CREATE TABLE book_issued_cnt AS
 SELECT b.isbn, b.book_title, COUNT(ist.issued_id) AS issue_count
 FROM issued_status as ist
-JOIN books as b
+JOIN
+books as b
 ON ist.issued_book_isbn = b.isbn
 GROUP BY b.isbn, b.book_title;
 ```
@@ -192,8 +193,7 @@ SELECT
     b.category,
     SUM(b.rental_price),
     COUNT(*)
-FROM 
-issued_status as ist
+FROM issued_status as ist
 JOIN
 books as b
 ON b.isbn = ist.issued_book_isbn
@@ -297,7 +297,7 @@ SELECT
 FROM issued_status as ist
 JOIN 
 members as m
-    ON m.member_id = ist.issued_member_id
+ON m.member_id = ist.issued_member_id
 JOIN 
 books as bk
 ON bk.isbn = ist.issued_book_isbn
@@ -514,7 +514,7 @@ JOIN
     branch as b
     ON e.branch_id = b.branch_id
 GROUP BY 1, 2
-ORDER BY no_book_issued
+ORDER BY no_book_issued DESC
 LIMIT 3;
 ```
 
